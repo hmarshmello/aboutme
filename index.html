@@ -91,7 +91,7 @@
                 </div>
             </div>
             <div class="md:w-1/2 flex justify-center mb-10 md:mb-0">
-                 <img src="m2.png" alt="Harsh Shrivastava" class="w-80 h-80 md:w-80 md:h-80 object-fill">
+                 <img src="m2.PNG" alt="Harsh Shrivastava" class="w-80 h-80 md:w-80 md:h-80 object-fill">
             </div></div>
         </section>
 
@@ -169,7 +169,20 @@
 
         <!-- Projects Section -->
         <section id="projects" class="py-20">
-            <h2 class="text-4xl font-bold text-center mb-12 text-white">My Projects</h2>
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-white">My Projects</h2>
+                <p class="text-gray-400 mt-2">Here are a few things I've built. Want a new idea?</p>
+                <button id="generate-project-btn" class="mt-4 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-6 rounded-full text-lg transition-transform hover:scale-105 inline-flex items-center">
+                    <span class="mr-2">✨ Generate a Project Idea</span>
+                    <div id="project-loader" class="loader hidden"></div>
+                </button>
+            </div>
+            
+            <div id="ai-project-container" class="hidden card-bg rounded-lg p-6 mb-8 border border-sky-500/50 shadow-lg">
+                <!-- AI Generated Project will be injected here -->
+            </div>
+
+
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Project Card 1 -->
                 <div class="card-bg rounded-lg overflow-hidden shadow-lg transition-all">
@@ -204,9 +217,21 @@
         <!-- Contact Section -->
         <section id="contact" class="py-20 text-center">
             <h2 class="text-4xl font-bold mb-4 text-white">Get In Touch</h2>
-            <p class="text-gray-400 mb-8 max-w-2xl mx-auto">I'm currently open to new opportunities and collaborations. Feel free to send me a mail or message about anything you want to discuss!</p>
-            <a href="mailto:shrivastavaharsh2024@gmail.com" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-full text-lg transition-transform hover:scale-105 inline-block">
-                Mail <i class="fas fa-paper-plane ml-2"></i>
+            <p class="text-gray-400 mb-8 max-w-2xl mx-auto">I'm currently open to new opportunities and collaborations. Feel free to send me a message about anything you want to discuss!</p>
+            
+            <div class="max-w-lg mx-auto bg-gray-800 p-6 rounded-lg">
+                <p class="text-left text-gray-400 mb-2">Need help drafting a message?</p>
+                <div class="flex gap-2">
+                    <input id="contact-keywords" type="text" placeholder="Enter keywords (e.g., 'AI project collaboration')" class="w-full bg-gray-700 text-white rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                    <button id="generate-message-btn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-md inline-flex items-center">
+                        <span class="mr-2">✨ Draft</span>
+                        <div id="message-loader" class="loader hidden"></div>
+                    </button>
+                </div>
+            </div>
+
+            <a href="mailto:shrivastavaharsh2024@gmail.com" class="mt-8 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-full text-lg transition-transform hover:scale-105 inline-block">
+                Say Hello <i class="fas fa-paper-plane ml-2"></i>
             </a>
         </section>
     </main>
@@ -218,9 +243,119 @@
         </div>
     </footer>
 
+    <!-- Modal for AI Generated Message -->
+    <div id="message-modal" class="fixed inset-0 modal-backdrop flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-gray-800 rounded-lg shadow-2xl max-w-lg w-full p-6 border border-gray-700">
+            <h3 class="text-2xl font-bold text-white mb-4">Generated Message</h3>
+            <div id="modal-content" class="text-gray-300 bg-gray-900 p-4 rounded-md whitespace-pre-wrap"></div>
+            <div class="mt-6 flex justify-end gap-4">
+                <button id="close-modal-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Close</button>
+                <button id="copy-message-btn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-md">Copy Text</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Typed.js for typing effect -->
     <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
     <script>
+        // --- Gemini API Call Function ---
+        async function callGemini(prompt, loaderElement) {
+            loaderElement.classList.remove('hidden');
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = "AIzaSyBWhwsEST7OzW6nSZ0m3PtPJbqArUJEoYM"; // API key will be injected by the environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                loaderElement.classList.add('hidden');
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    return "Sorry, I couldn't generate a response. Please try again.";
+                }
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                loaderElement.classList.add('hidden');
+                return "An error occurred. Please check the console for details.";
+            }
+        }
+
+        // --- AI Project Idea Generator ---
+        const generateProjectBtn = document.getElementById('generate-project-btn');
+        const projectLoader = document.getElementById('project-loader');
+        const aiProjectContainer = document.getElementById('ai-project-container');
+
+        generateProjectBtn.addEventListener('click', async () => {
+            const prompt = `Generate a novel, single project idea for a data and AI professional's portfolio. The idea should be innovative and impressive. Provide a response with the following structure, using markdown:
+### [Project Title]
+**Description:** [A compelling, one-paragraph description of the project.]
+**Key Technologies:** [A comma-separated list of key technologies, e.g., Python, PyTorch, CrewAI, AWS, Tableau.]
+**Challenge:** [A one-sentence description of the main challenge this project solves.]`;
+            
+            aiProjectContainer.classList.remove('hidden');
+            aiProjectContainer.innerHTML = '<div class="loader mx-auto"></div>'; // Show loader inside container
+            
+            const responseText = await callGemini(prompt, projectLoader);
+            
+            // A simple way to convert markdown-like text to HTML
+            let htmlResponse = responseText
+                .replace(/### (.*)/g, '<h3 class="text-2xl font-bold text-sky-400 mb-2">$1</h3>')
+                .replace(/\*\*(.*?):\*\*/g, '<strong class="text-white">$1:</strong>')
+                .replace(/\n/g, '<br>');
+
+            aiProjectContainer.innerHTML = htmlResponse;
+        });
+        
+        // --- AI Contact Message Assistant ---
+        const generateMessageBtn = document.getElementById('generate-message-btn');
+        const messageLoader = document.getElementById('message-loader');
+        const contactKeywordsInput = document.getElementById('contact-keywords');
+        const modal = document.getElementById('message-modal');
+        const modalContent = document.getElementById('modal-content');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const copyMessageBtn = document.getElementById('copy-message-btn');
+
+        generateMessageBtn.addEventListener('click', async () => {
+            const keywords = contactKeywordsInput.value;
+            if (!keywords.trim()) {
+                modalContent.textContent = "Please enter some keywords first.";
+                modal.classList.remove('hidden');
+                return;
+            }
+            const prompt = `Draft a professional and concise contact message for a portfolio website. The user wants to inquire about: "${keywords}". The message should be friendly, direct, and respectful of the recipient's time. Start with a greeting and end with a sign-off from "A Curious Visitor".`;
+            
+            const responseText = await callGemini(prompt, messageLoader);
+            modalContent.textContent = responseText;
+            modal.classList.remove('hidden');
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        copyMessageBtn.addEventListener('click', () => {
+            const textToCopy = modalContent.textContent;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+            copyMessageBtn.textContent = 'Copied!';
+            setTimeout(() => {
+                copyMessageBtn.textContent = 'Copy Text';
+            }, 2000);
+        });
+
         // Typing effect
         new Typed('#typed', {
             strings: ['Data Analyst', 'Data Scientist', 'GenAI Engineer','BI Developer', 'Data Engineer'],
@@ -232,7 +367,7 @@
             autoInsertCss: true
         });
 
-        // Mobile menu toggle
+        // --- Mobile menu toggle ---
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         mobileMenuButton.addEventListener('click', () => {
