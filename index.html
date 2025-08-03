@@ -173,9 +173,10 @@
                 <h2 class="text-4xl font-bold text-white">My Projects</h2>
                 <p class="text-gray-400 mt-2">Here are a few things I've built. Want a new idea?</p>
                 <button id="generate-project-btn" class="mt-4 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-6 rounded-full text-lg transition-transform hover:scale-105 inline-flex items-center">
-                    <span class="mr-2">✨ Generate a Project Idea</span>
+                    <span class="mr-2">✨ Generate a Project Idea</span> 
                     <div id="project-loader" class="loader hidden"></div>
                 </button>
+                <p>wait 10 seconds</p>
             </div>
             
             <div id="ai-project-container" class="hidden card-bg rounded-lg p-6 mb-8 border border-sky-500/50 shadow-lg">
@@ -183,32 +184,45 @@
             </div>
 
 
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="grid md:grid-cols-3 lg:grid-cols-3 gap-8">
                 <!-- Project Card 1 -->
                 <div class="card-bg rounded-lg overflow-hidden shadow-lg transition-all">
-                    <img src="https://placehold.co/600x400/111827/38bdf8?text=GroqVerse" alt="Project 1" class="w-full h-48 object-cover">
                     <div class="p-6">
-                        <h3 class="text-2xl font-bold mb-2 text-white">GroqVerse Chatbot</h3>
-                        <p class="text-gray-400 mb-4">An innovative multi-modal chatbot platform offering seamless text, audio, and image-based conversations, powered by the Groq API.</p>
+                        <h3 class="text-2xl font-bold mb-2 text-white">GemBots</h3>
+                        <p class="text-gray-400 mb-4">An innovative multi-modal chatbot platform offering seamless text, audio, and image-based conversations, powered by the Google API</p>
                         <a href="#" class="text-sky-400 hover:underline">View Project <i class="fas fa-arrow-right ml-1"></i></a>
                     </div>
                 </div>
                 <!-- Project Card 2 -->
                 <div class="card-bg rounded-lg overflow-hidden shadow-lg transition-all">
-                    <img src="https://placehold.co/600x400/111827/38bdf8?text=E-commerce+Site" alt="Project 2" class="w-full h-48 object-cover">
                     <div class="p-6">
-                        <h3 class="text-2xl font-bold mb-2 text-white">E-commerce Platform</h3>
-                        <p class="text-gray-400 mb-4">A full-stack e-commerce website with product listings, a shopping cart, and a checkout system, built with the MERN stack.</p>
-                        <a href="#" class="text-sky-400 hover:underline">View Project <i class="fas fa-arrow-right ml-1"></i></a>
+                        <h3 class="text-2xl font-bold mb-2 text-white">PipeGate</h3>
+                        <p class="text-gray-400 mb-4">Awesome Solution tool that migrates AWS Glue Scripts to Azure Data Factory Code using Strand Agents of CrewAI Orchestration and Vue as Frontend</p>
+                        <a class="text-sky-400 hover:underline">Under Process <progress value="85" max="100"></progress"><i class="fas fa-arrow-right ml-1"></i></a>
                     </div>
                 </div>
                 <!-- Project Card 3 -->
                 <div class="card-bg rounded-lg overflow-hidden shadow-lg transition-all">
-                    <img src="https://placehold.co/600x400/111827/38bdf8?text=Portfolio+Website" alt="Project 3" class="w-full h-48 object-cover">
                     <div class="p-6">
                         <h3 class="text-2xl font-bold mb-2 text-white">Personal Portfolio</h3>
                         <p class="text-gray-400 mb-4">A responsive personal portfolio website (like this one!) to showcase my skills and projects, built with HTML, Tailwind CSS, and JS.</p>
                         <a href="#" class="text-sky-400 hover:underline">View Project <i class="fas fa-arrow-right ml-1"></i></a>
+                    </div>
+                </div>
+                <!-- Project Card 4 -->
+                <div class="card-bg rounded-lg overflow-hidden shadow-lg transition-all">
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold mb-2 text-white">KPI Board</h3>
+                        <p class="text-gray-400 mb-4">A responsive dashboard utilising Data Analysis and AI, providing insights based on the stakeholders requirements, performing ML using AI and static Visualizations</p>
+                        <a class="text-sky-400 hover:underline">Under Process <progress value="25" max="100"></progress"><i class="fas fa-arrow-right ml-1"></i></a>
+                    </div>
+                </div>
+                <!-- Project Card 5 -->
+                <div class="card-bg rounded-lg overflow-hidden shadow-lg transition-all">
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold mb-2 text-white">Kissan</h3>
+                        <p class="text-gray-400 mb-4">A All-In-One multi-modal chatbot that helps Farmers around Karnataka region to communicate in Kannada language using audio and chat to get insights on the market prices, local news related to their crops or region, about the govt law regulations and policies, and also helps them identify crop conditions using Google Vertex AI.</p>
+                        <a class="text-sky-400 hover:underline">Under Process <progress value="95" max="100"></progress"><i class="fas fa-arrow-right ml-1"></i></a>
                     </div>
                 </div>
             </div>
@@ -227,6 +241,7 @@
                         <span class="mr-2">✨ Draft</span>
                         <div id="message-loader" class="loader hidden"></div>
                     </button>
+                    <p>wait 10 seconds</p>
                 </div>
             </div>
 
@@ -258,13 +273,31 @@
     <!-- Typed.js for typing effect -->
     <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
     <script>
+        // --- Helper function to toggle loader visibility ---
+        function toggleLoader(button, isLoading) {
+            const buttonText = button.querySelector('.btn-text');
+            const loader = button.querySelector('.loader');
+            // Guard against missing elements
+            if (!loader) return; 
+
+            if (isLoading) {
+                if (buttonText) buttonText.classList.add('hidden');
+                loader.classList.remove('hidden');
+                button.disabled = true;
+            } else {
+                if (buttonText) buttonText.classList.remove('hidden');
+                loader.classList.add('hidden');
+                button.disabled = false;
+            }
+        }
+
         // --- Gemini API Call Function ---
-        async function callGemini(prompt, loaderElement) {
-            loaderElement.classList.remove('hidden');
+        async function callGemini(prompt) {
             let chatHistory = [];
             chatHistory.push({ role: "user", parts: [{ text: prompt }] });
             const payload = { contents: chatHistory };
-            const apiKey = "AIzaSyBWhwsEST7OzW6nSZ0m3PtPJbqArUJEoYM"; // API key will be injected by the environment
+            // CORRECT: API key is an empty string to allow the environment to inject it.
+            const apiKey = "AIzaSyBWhwsEST7OzW6nSZ0m3PtPJbqArUJEoYM"; 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
             
             try {
@@ -274,50 +307,62 @@
                     body: JSON.stringify(payload)
                 });
                 const result = await response.json();
-                loaderElement.classList.add('hidden');
                 if (result.candidates && result.candidates.length > 0 &&
                     result.candidates[0].content && result.candidates[0].content.parts &&
                     result.candidates[0].content.parts.length > 0) {
                     return result.candidates[0].content.parts[0].text;
                 } else {
-                    return "Sorry, I couldn't generate a response. Please try again.";
+                    console.error("Gemini API response format error:", result);
+                    return "Sorry, I couldn't generate a response due to an unexpected format. Please try again.";
                 }
             } catch (error) {
                 console.error("Error calling Gemini API:", error);
-                loaderElement.classList.add('hidden');
                 return "An error occurred. Please check the console for details.";
             }
         }
 
         // --- AI Project Idea Generator ---
         const generateProjectBtn = document.getElementById('generate-project-btn');
-        const projectLoader = document.getElementById('project-loader');
         const aiProjectContainer = document.getElementById('ai-project-container');
 
         generateProjectBtn.addEventListener('click', async () => {
+            const startTime = Date.now();
+            toggleLoader(generateProjectBtn, true);
+            
+            // Hide the project container while we wait for the new content
+            aiProjectContainer.classList.add('hidden');
+            aiProjectContainer.innerHTML = '';
+            
             const prompt = `Generate a novel, single project idea for a data and AI professional's portfolio. The idea should be innovative and impressive. Provide a response with the following structure, using markdown:
 ### [Project Title]
 **Description:** [A compelling, one-paragraph description of the project.]
 **Key Technologies:** [A comma-separated list of key technologies, e.g., Python, PyTorch, CrewAI, AWS, Tableau.]
 **Challenge:** [A one-sentence description of the main challenge this project solves.]`;
             
-            aiProjectContainer.classList.remove('hidden');
-            aiProjectContainer.innerHTML = '<div class="loader mx-auto"></div>'; // Show loader inside container
+            const responseText = await callGemini(prompt);
             
-            const responseText = await callGemini(prompt, projectLoader);
-            
-            // A simple way to convert markdown-like text to HTML
             let htmlResponse = responseText
                 .replace(/### (.*)/g, '<h3 class="text-2xl font-bold text-sky-400 mb-2">$1</h3>')
                 .replace(/\*\*(.*?):\*\*/g, '<strong class="text-white">$1:</strong>')
                 .replace(/\n/g, '<br>');
 
+            // Add the new content and show the container
             aiProjectContainer.innerHTML = htmlResponse;
+            aiProjectContainer.classList.remove('hidden');
+
+            const elapsedTime = Date.now() - startTime;
+            const minDisplayTime = 500; // Minimum 500ms for loader visibility
+            const remainingTime = minDisplayTime - elapsedTime;
+
+            if (remainingTime > 0) {
+                setTimeout(() => toggleLoader(generateProjectBtn, false), remainingTime);
+            } else {
+                toggleLoader(generateProjectBtn, false);
+            }
         });
         
         // --- AI Contact Message Assistant ---
         const generateMessageBtn = document.getElementById('generate-message-btn');
-        const messageLoader = document.getElementById('message-loader');
         const contactKeywordsInput = document.getElementById('contact-keywords');
         const modal = document.getElementById('message-modal');
         const modalContent = document.getElementById('modal-content');
@@ -331,11 +376,25 @@
                 modal.classList.remove('hidden');
                 return;
             }
+
+            const startTime = Date.now();
+            toggleLoader(generateMessageBtn, true);
+            
             const prompt = `Draft a professional and concise contact message for a portfolio website. The user wants to inquire about: "${keywords}". The message should be friendly, direct, and respectful of the recipient's time. Start with a greeting and end with a sign-off from "A Curious Visitor".`;
             
-            const responseText = await callGemini(prompt, messageLoader);
+            const responseText = await callGemini(prompt);
             modalContent.textContent = responseText;
             modal.classList.remove('hidden');
+
+            const elapsedTime = Date.now() - startTime;
+            const minDisplayTime = 500;
+            const remainingTime = minDisplayTime - elapsedTime;
+
+            if (remainingTime > 0) {
+                setTimeout(() => toggleLoader(generateMessageBtn, false), remainingTime);
+            } else {
+                toggleLoader(generateMessageBtn, false);
+            }
         });
 
         closeModalBtn.addEventListener('click', () => {
@@ -356,7 +415,7 @@
             }, 2000);
         });
 
-        // Typing effect
+        // --- Typed.js for typing effect ---
         new Typed('#typed', {
             strings: ['Data Analyst', 'Data Scientist', 'GenAI Engineer','BI Developer', 'Data Engineer'],
             typeSpeed: 50,
